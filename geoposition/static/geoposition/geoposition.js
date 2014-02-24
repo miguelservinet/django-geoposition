@@ -3,7 +3,6 @@ if (jQuery != undefined) {
         'jQuery': jQuery,
     }
 }
-
 (function($) {
     $(document).ready(function() {
         var mapDefaults = {
@@ -135,4 +134,4 @@ if (jQuery != undefined) {
             });
         });
     });
-})(django.jQuery);
+})(yawdadmin.jQuery);
