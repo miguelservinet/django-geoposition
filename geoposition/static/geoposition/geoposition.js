@@ -3,11 +3,29 @@ if (jQuery != undefined) {
         'jQuery': jQuery,
     }
 }
+
+
 (function($) {
+
     $(document).ready(function() {
+
+        try {
+            var _ = google;
+        } catch (ReferenceError) {
+            console.log('geoposition: "google" not defined.  You might not be connected to the internet.');
+            return;
+        }
+
         var mapDefaults = {
             'mapTypeId': google.maps.MapTypeId.ROADMAP,
-            'scrollwheel': false
+            'scrollwheel': false,
+            'streetViewControl': false,
+            'panControl': false
+        };
+
+        var markerDefaults = {
+            'draggable': true,
+            'animation': google.maps.Animation.DROP
         };
 
         $('.geoposition-widget').each(function() {
@@ -18,15 +36,19 @@ if (jQuery != undefined) {
                 $searchInput = $('<input>', {'type': 'search', 'placeholder': 'Start typing an address …'}),
                 $latitudeField = $container.find('input.geoposition:eq(0)'),
                 $longitudeField = $container.find('input.geoposition:eq(1)'),
-                latitude = parseFloat($latitudeField.val()) || 0,
-                longitude = parseFloat($longitudeField.val()) || 0,
+                latitude = parseFloat($latitudeField.val()) || null,
+                longitude = parseFloat($longitudeField.val()) || null,
                 map,
                 mapLatLng,
                 mapOptions,
+                mapCustomOptions,
+                markerOptions,
+                markerCustomOptions,
                 marker;
 
             $mapContainer.css('height', $container.data('map-widget-height') + 'px');
-
+            mapCustomOptions = $container.data('map-options') || {};
+            markerCustomOptions = $container.data('marker-options') || {};
 
             function doSearch() {
                 var gc = new google.maps.Geocoder();
@@ -101,19 +123,27 @@ if (jQuery != undefined) {
             $container.append($searchRow, $mapContainer, $addressRow);
 
             mapLatLng = new google.maps.LatLng(latitude, longitude);
-            mapOptions = $.extend({}, mapDefaults, {
-                'center': mapLatLng,
-                'zoom': latitude && longitude ? 15 : 1,
-                'streetViewControl': false,
-                'panControl': false
-            });
+
+            mapOptions = $.extend({}, mapDefaults, mapCustomOptions);
+
+            if (!(latitude === null && longitude === null && mapOptions['center'])) {
+                mapOptions['center'] = mapLatLng;
+            }
+
+            if (!mapOptions['zoom']) {
+                mapOptions['zoom'] = latitude && longitude ? 15 : 1;
+            }
+
             map = new google.maps.Map($mapContainer.get(0), mapOptions);
-            marker = new google.maps.Marker({
-                'position': mapLatLng,
-                'map': map,
-                'draggable': true,
-                'animation': google.maps.Animation.DROP
+            markerOptions = $.extend({}, markerDefaults, markerCustomOptions, {
+                'map': map
             });
+
+            if (!(latitude === null && longitude === null && markerOptions['position'])) {
+                markerOptions['position'] = mapLatLng;
+            }
+
+            marker = new google.maps.Marker(markerOptions);
             google.maps.event.addListener(marker, 'dragend', function() {
                 $latitudeField.val(this.position.lat());
                 $longitudeField.val(this.position.lng());
@@ -134,4 +164,4 @@ if (jQuery != undefined) {
             });
         });
     });
-})(yawdadmin.jQuery);
+})(django.jQuery);
