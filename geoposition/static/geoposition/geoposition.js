@@ -164,4 +164,4 @@ if (jQuery != undefined) {
             });
         });
     });
-})(django.jQuery);
+})(yawdadmin.jQuery);
